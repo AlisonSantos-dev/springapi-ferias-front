@@ -6,6 +6,9 @@ import { useAuth } from "../context/AuthContext";
 import SolicitarFeriasForm from "../components/SolicitarFeriasForm";
 import Topbar from "../components/Topbar";
 import StatusBadge from "../components/StatusBadge";
+import AvisoConflito from "../components/AvisoConflito";
+import PeriodosDaEquipe from "../components/PeriodosDaEquipe";
+import CalendarioEquipe from "../components/CalendarioEquipe";
 
 export default function MinhasFerias() {
   const [periodos, setPeriodos] = useState([]);
@@ -13,7 +16,7 @@ export default function MinhasFerias() {
   const [erro, setErro] = useState("");
   const [erroAcao, setErroAcao] = useState("");
 
-  const { isCoordenador, logout } = useAuth();
+  const { isCoordenador, equipeId, logout } = useAuth();
 
   const carregar = useCallback(() => {
     setCarregando(true);
@@ -49,6 +52,9 @@ export default function MinhasFerias() {
 
       <SolicitarFeriasForm onSucesso={carregar} />
 
+      {equipeId && <CalendarioEquipe />}
+      {equipeId && <PeriodosDaEquipe />}
+
       {erroAcao && <div className="alert alert-error">{erroAcao}</div>}
       {erro && <div className="alert alert-error">{erro}</div>}
       {carregando && <p className="empty-state">Carregando...</p>}
@@ -75,6 +81,7 @@ export default function MinhasFerias() {
                 <td>{p.dataFim}</td>
                 <td>
                   <StatusBadge status={p.status} />
+                  {p.conflitoComEquipe && <AvisoConflito colegas={p.colegasConflitantes} />}
                 </td>
                 <td>{p.aprovadoPorNome || "-"}</td>
                 <td>

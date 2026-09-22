@@ -193,6 +193,103 @@ table.list td {
 .badge-aprovado { background: rgba(46, 125, 83, 0.14); color: var(--color-aprovado); }
 .badge-rejeitado { background: rgba(181, 71, 58, 0.14); color: var(--color-rejeitado); }
 
+.aviso-conflito {
+  display: inline-block;
+  margin-left: 0.5rem;
+  font-size: 0.78rem;
+  color: var(--color-pendente);
+  font-weight: 500;
+}
+
+.calendario-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.calendario-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.calendario-semana {
+  margin-bottom: 4px;
+}
+
+.calendario-dia-semana {
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  padding: 0.25rem 0;
+}
+
+.calendario-dia {
+  min-height: 56px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 0.3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.calendario-dia-vazio {
+  border: none;
+  background: transparent;
+}
+
+.calendario-numero {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+.calendario-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  align-items: center;
+}
+
+.calendario-tag {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  display: inline-block;
+  cursor: default;
+}
+
+.calendario-tag-pendente {
+  background: var(--color-pendente);
+}
+
+.calendario-tag-aprovado {
+  background: var(--color-aprovado);
+}
+
+.calendario-tag-mais {
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+  cursor: default;
+}
+
+.calendario-legenda {
+  display: flex;
+  gap: 1.5rem;
+  margin-top: 1rem;
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  align-items: center;
+}
+
+.calendario-legenda .calendario-tag {
+  margin-right: 0.35rem;
+  vertical-align: middle;
+}
+
 .alert {
   padding: 0.75rem 1rem;
   border-radius: 6px;
