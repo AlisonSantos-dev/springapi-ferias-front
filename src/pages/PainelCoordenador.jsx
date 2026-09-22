@@ -3,6 +3,10 @@ import { Link } from "react-router-dom";
 import api from "../api/api";
 import { extrairMensagemErro } from "../api/errors";
 import { useAuth } from "../context/AuthContext";
+import Topbar from "../components/Topbar";
+import StatusBadge from "../components/StatusBadge";
+import AvisoConflito from "../components/AvisoConflito";
+import CadastrarColaboradorForm from "../components/CadastrarColaboradorForm";
 
 export default function PainelCoordenador() {
   const [equipes, setEquipes] = useState([]);
@@ -12,7 +16,7 @@ export default function PainelCoordenador() {
   const [erro, setErro] = useState("");
   const [erroAcao, setErroAcao] = useState("");
 
-  const { nome, logout } = useAuth();
+  const { logout } = useAuth();
 
   useEffect(() => {
     api
@@ -61,22 +65,21 @@ export default function PainelCoordenador() {
   }
 
   return (
-    <div style={{ fontFamily: "sans-serif", padding: "2rem" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <h1>Painel do coordenador</h1>
-        <div>
-          {nome && <span style={{ marginRight: "1rem" }}>Ola, {nome}</span>}
-          <Link to="/minhas-ferias" style={{ marginRight: "1rem" }}>
-            Minhas ferias
-          </Link>
-          <button onClick={logout}>Sair</button>
-        </div>
-      </div>
+    <div className="page">
+      <Topbar title="Painel do coordenador">
+        <Link to="/minhas-ferias">Minhas ferias</Link>
+        <button className="btn btn-ghost" onClick={logout}>
+          Sair
+        </button>
+      </Topbar>
 
-      <div style={{ margin: "1rem 0" }}>
-        <label>
-          Equipe:{" "}
+      <CadastrarColaboradorForm />
+
+      <div className="card">
+        <div className="field">
+          <label htmlFor="equipe">Equipe</label>
           <select
+            id="equipe"
             value={equipeSelecionada}
             onChange={(e) => setEquipeSelecionada(e.target.value)}
           >
@@ -86,24 +89,26 @@ export default function PainelCoordenador() {
               </option>
             ))}
           </select>
-        </label>
+        </div>
       </div>
 
-      {erroAcao && <p style={{ color: "red" }}>{erroAcao}</p>}
-      {erro && <p style={{ color: "red" }}>{erro}</p>}
-      {carregando && <p>Carregando...</p>}
+      {erroAcao && <div className="alert alert-error">{erroAcao}</div>}
+      {erro && <div className="alert alert-error">{erro}</div>}
+      {carregando && <p className="empty-state">Carregando...</p>}
 
-      {!carregando && periodos.length === 0 && <p>Nenhum periodo de ferias registrado nessa equipe.</p>}
+      {!carregando && periodos.length === 0 && (
+        <p className="empty-state">Nenhum periodo de ferias registrado nessa equipe.</p>
+      )}
 
       {!carregando && periodos.length > 0 && (
-        <table border="1" cellPadding="8" style={{ borderCollapse: "collapse" }}>
+        <table className="list">
           <thead>
             <tr>
               <th>Solicitante</th>
               <th>Inicio</th>
               <th>Fim</th>
               <th>Status</th>
-              <th>Acao</th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
@@ -112,14 +117,19 @@ export default function PainelCoordenador() {
                 <td>{p.solicitanteNome}</td>
                 <td>{p.dataInicio}</td>
                 <td>{p.dataFim}</td>
-                <td>{p.status}</td>
+                <td>
+                  <StatusBadge status={p.status} />
+                  {p.conflitoComEquipe && <AvisoConflito colegas={p.colegasConflitantes} />}
+                </td>
                 <td>
                   {p.status === "PENDENTE" && (
                     <>
-                      <button onClick={() => aprovar(p.id)} style={{ marginRight: "0.5rem" }}>
+                      <button className="btn btn-approve" onClick={() => aprovar(p.id)} style={{ marginRight: "0.5rem" }}>
                         Aprovar
                       </button>
-                      <button onClick={() => rejeitar(p.id)}>Rejeitar</button>
+                      <button className="btn btn-reject" onClick={() => rejeitar(p.id)}>
+                        Rejeitar
+                      </button>
                     </>
                   )}
                 </td>

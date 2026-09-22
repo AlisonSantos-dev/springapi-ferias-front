@@ -4,6 +4,8 @@ import api from "../api/api";
 import { extrairMensagemErro } from "../api/errors";
 import { useAuth } from "../context/AuthContext";
 import SolicitarFeriasForm from "../components/SolicitarFeriasForm";
+import Topbar from "../components/Topbar";
+import StatusBadge from "../components/StatusBadge";
 
 export default function MinhasFerias() {
   const [periodos, setPeriodos] = useState([]);
@@ -11,7 +13,7 @@ export default function MinhasFerias() {
   const [erro, setErro] = useState("");
   const [erroAcao, setErroAcao] = useState("");
 
-  const { nome, isCoordenador, logout } = useAuth();
+  const { isCoordenador, logout } = useAuth();
 
   const carregar = useCallback(() => {
     setCarregando(true);
@@ -37,39 +39,33 @@ export default function MinhasFerias() {
   }
 
   return (
-    <div style={{ fontFamily: "sans-serif", padding: "2rem" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <h1>Minhas ferias</h1>
-        <div>
-          {nome && <span style={{ marginRight: "1rem" }}>Ola, {nome}</span>}
-          {isCoordenador && (
-            <Link to="/coordenador" style={{ marginRight: "1rem" }}>
-              Painel do coordenador
-            </Link>
-          )}
-          <button onClick={logout}>Sair</button>
-        </div>
-      </div>
+    <div className="page">
+      <Topbar title="Minhas ferias">
+        {isCoordenador && <Link to="/coordenador">Painel do coordenador</Link>}
+        <button className="btn btn-ghost" onClick={logout}>
+          Sair
+        </button>
+      </Topbar>
 
       <SolicitarFeriasForm onSucesso={carregar} />
 
-      {erroAcao && <p style={{ color: "red" }}>{erroAcao}</p>}
-      {carregando && <p>Carregando...</p>}
-      {erro && <p style={{ color: "red" }}>{erro}</p>}
+      {erroAcao && <div className="alert alert-error">{erroAcao}</div>}
+      {erro && <div className="alert alert-error">{erro}</div>}
+      {carregando && <p className="empty-state">Carregando...</p>}
 
       {!carregando && !erro && periodos.length === 0 && (
-        <p>Voce ainda nao tem nenhum periodo de ferias cadastrado.</p>
+        <p className="empty-state">Voce ainda nao solicitou nenhum periodo de ferias.</p>
       )}
 
       {!carregando && periodos.length > 0 && (
-        <table border="1" cellPadding="8" style={{ borderCollapse: "collapse" }}>
+        <table className="list">
           <thead>
             <tr>
               <th>Inicio</th>
               <th>Fim</th>
               <th>Status</th>
               <th>Aprovado por</th>
-              <th>Acao</th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
@@ -77,11 +73,15 @@ export default function MinhasFerias() {
               <tr key={p.id}>
                 <td>{p.dataInicio}</td>
                 <td>{p.dataFim}</td>
-                <td>{p.status}</td>
+                <td>
+                  <StatusBadge status={p.status} />
+                </td>
                 <td>{p.aprovadoPorNome || "-"}</td>
                 <td>
                   {p.status === "PENDENTE" && (
-                    <button onClick={() => cancelar(p.id)}>Cancelar</button>
+                    <button className="btn btn-ghost" onClick={() => cancelar(p.id)}>
+                      Cancelar
+                    </button>
                   )}
                 </td>
               </tr>

@@ -7,6 +7,10 @@ export function AuthProvider({ children }) {
   const [token, setToken] = useState(() => localStorage.getItem("token"));
   const [nome, setNome] = useState(() => localStorage.getItem("nome"));
   const [role, setRole] = useState(() => localStorage.getItem("role"));
+  const [equipeId, setEquipeId] = useState(() => localStorage.getItem("equipeId"));
+  const [senhaTemporaria, setSenhaTemporaria] = useState(
+    () => localStorage.getItem("senhaTemporaria") === "true"
+  );
 
   async function login(email, senha) {
     const response = await api.post("/login", { email, senha });
@@ -15,15 +19,19 @@ export function AuthProvider({ children }) {
     localStorage.setItem("token", novoToken);
     setToken(novoToken);
 
-    // O nome e a role vem dentro do token (claims "nome" e "role"),
-    // decodificamos so a parte do meio do JWT (payload em base64) pra
-    // exibir/usar na tela sem precisar de outra chamada a API.
+    // Os dados do colaborador vem dentro do token (claims), decodificamos
+    // so a parte do meio do JWT (payload em base64) pra usar na tela sem
+    // precisar de outra chamada a API.
     try {
       const payload = JSON.parse(atob(novoToken.split(".")[1]));
       localStorage.setItem("nome", payload.nome || "");
       localStorage.setItem("role", payload.role || "");
+      localStorage.setItem("equipeId", payload.equipeId || "");
+      localStorage.setItem("senhaTemporaria", String(!!payload.senhaTemporaria));
       setNome(payload.nome || "");
       setRole(payload.role || "");
+      setEquipeId(payload.equipeId || "");
+      setSenhaTemporaria(!!payload.senhaTemporaria);
     } catch {
       // se por algum motivo nao der pra decodificar, segue sem esses dados
     }
@@ -33,15 +41,21 @@ export function AuthProvider({ children }) {
     localStorage.removeItem("token");
     localStorage.removeItem("nome");
     localStorage.removeItem("role");
+    localStorage.removeItem("equipeId");
+    localStorage.removeItem("senhaTemporaria");
     setToken(null);
     setNome(null);
     setRole(null);
+    setEquipeId(null);
+    setSenhaTemporaria(false);
   }
 
   const value = {
     token,
     nome,
     role,
+    equipeId,
+    senhaTemporaria,
     isCoordenador: role === "COORDENADOR",
     isAuthenticated: !!token,
     login,

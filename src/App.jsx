@@ -2,6 +2,8 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Login from "./pages/Login";
+import Cadastro from "./pages/Cadastro";
+import TrocarSenha from "./pages/TrocarSenha";
 import MinhasFerias from "./pages/MinhasFerias";
 import PainelCoordenador from "./pages/PainelCoordenador";
 
@@ -11,6 +13,15 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<Login />} />
+          <Route path="/cadastro" element={<Cadastro />} />
+          <Route
+            path="/trocar-senha"
+            element={
+              <ProtectedRoute forcarTrocaSenha={false}>
+                <TrocarSenha />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/minhas-ferias"
             element={
@@ -27,8 +38,6 @@ function App() {
               </ProtectedRoute>
             }
           />
-          {/* raiz redireciona pra minhas-ferias; se nao estiver logado,
-              o ProtectedRoute manda pro /login sozinho */}
           <Route path="/" element={<Navigate to="/minhas-ferias" replace />} />
         </Routes>
       </BrowserRouter>

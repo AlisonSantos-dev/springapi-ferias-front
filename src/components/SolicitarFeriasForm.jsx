@@ -26,34 +26,39 @@ export default function SolicitarFeriasForm({ onSucesso }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} style={{ margin: "1rem 0", padding: "1rem", border: "1px solid #ccc" }}>
-      <h3 style={{ marginTop: 0 }}>Solicitar ferias</h3>
+    <div className="card">
+      <h2>Solicitar ferias</h2>
+      <form onSubmit={handleSubmit}>
+        <div className="field-row">
+          <div className="field">
+            <label htmlFor="dataInicio">Inicio</label>
+            <input
+              id="dataInicio"
+              type="date"
+              value={dataInicio}
+              onChange={(e) => setDataInicio(e.target.value)}
+              required
+            />
+          </div>
 
-      <label style={{ marginRight: "1rem" }}>
-        Inicio:{" "}
-        <input
-          type="date"
-          value={dataInicio}
-          onChange={(e) => setDataInicio(e.target.value)}
-          required
-        />
-      </label>
+          <div className="field">
+            <label htmlFor="dataFim">Fim</label>
+            <input
+              id="dataFim"
+              type="date"
+              value={dataFim}
+              onChange={(e) => setDataFim(e.target.value)}
+              required
+            />
+          </div>
 
-      <label style={{ marginRight: "1rem" }}>
-        Fim:{" "}
-        <input
-          type="date"
-          value={dataFim}
-          onChange={(e) => setDataFim(e.target.value)}
-          required
-        />
-      </label>
+          <button type="submit" className="btn btn-primary" disabled={enviando}>
+            {enviando ? "Enviando..." : "Solicitar"}
+          </button>
+        </div>
 
-      <button type="submit" disabled={enviando}>
-        {enviando ? "Enviando..." : "Solicitar"}
-      </button>
-
-      {erro && <p style={{ color: "red" }}>{erro}</p>}
-    </form>
+        {erro && <div className="alert alert-error">{erro}</div>}
+      </form>
+    </div>
   );
 }
