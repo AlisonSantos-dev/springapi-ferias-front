@@ -3,8 +3,12 @@ import axios from "axios";
 // Instancia central do axios. Todas as chamadas pra API do springapi-ferias
 // devem usar essa instancia, em vez de axios.get/post direto - assim o token
 // e a URL base ficam configurados em um so lugar.
+//
+// VITE_API_URL fica vazio em producao (front e back no mesmo dominio) e
+// aponta pro backend local em desenvolvimento (http://localhost:8080).
+// O /api no final bate com o prefixo que todos os endpoints do backend usam.
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL: `${import.meta.env.VITE_API_URL || ""}/api`,
 });
 
 // Antes de cada requisicao, anexa o token JWT guardado no localStorage
