@@ -21,15 +21,31 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Se o backend responder 401/403 (token invalido, expirado ou sem permissao),
-// limpa o token guardado. A tela que consome isso decide o que fazer
-// (redirecionar pro login, mostrar mensagem, etc).
+// Chaves que o front guarda sobre a sessao (ver AuthContext).
+const CHAVES_SESSAO = ["token", "nome", "role", "equipeId", "senhaTemporaria"];
+
+// Se o backend responder 401, o token guardado nao vale mais (expirou, ou foi
+// assinado com outra chave, por exemplo depois de um deploy). Limpa tudo e
+// recarrega na tela de login, que entra de novo sozinha pela conta DB1.
+//
+// 403 NAO desloga: significa "voce entrou, mas nao pode fazer isso" (ex.: um
+// colaborador tentando uma acao de coordenador). A tela mostra o erro.
+//
+// As chamadas da propria tela de login ficam de fora, senao um "senha
+// errada" ou "sem conta DB1" recarregaria a pagina em loop.
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response && (error.response.status === 401 || error.response.status === 403)) {
-      // por enquanto so limpa o token; o tratamento de UI vem no passo 2
-      localStorage.removeItem("token");
+    const url = (error.config && error.config.url) || "";
+    const chamadaDoLogin = url.startsWith("/login") || url.startsWith("/auth/sso") || url.startsWith("/auth/config");
+
+    if (error.response && error.response.status === 401 && !chamadaDoLogin) {
+      CHAVES_SESSAO.forEach((chave) => localStorage.removeItem(chave));
+      if (window.location.pathname === "/login") {
+        window.location.reload();
+      } else {
+        window.location.assign("/login");
+      }
     }
     return Promise.reject(error);
   }

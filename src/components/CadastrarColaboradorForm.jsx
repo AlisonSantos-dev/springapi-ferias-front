@@ -11,6 +11,9 @@ export default function CadastrarColaboradorForm({ onSucesso }) {
   const [role, setRole] = useState("COLABORADOR");
   const [equipeId, setEquipeId] = useState("");
   const [equipes, setEquipes] = useState([]);
+  // em producao ninguem tem senha (todo mundo entra pela conta DB1), entao o
+  // campo de senha so aparece quando o login por senha estiver ligado
+  const [senhaHabilitada, setSenhaHabilitada] = useState(false);
 
   const [erro, setErro] = useState("");
   const [sucesso, setSucesso] = useState("");
@@ -27,6 +30,10 @@ export default function CadastrarColaboradorForm({ onSucesso }) {
         }
       })
       .catch(() => setErro("Nao foi possivel carregar as equipes."));
+    api
+      .get("/auth/config")
+      .then((response) => setSenhaHabilitada(!!response.data.senhaHabilitada))
+      .catch(() => setSenhaHabilitada(true));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [aberto]);
 
@@ -44,7 +51,9 @@ export default function CadastrarColaboradorForm({ onSucesso }) {
     setEnviando(true);
 
     try {
-      const response = await api.post("/colaboradores", { nome, email, senha, role, equipeId });
+      const corpo = { nome, email, role, equipeId };
+      if (senhaHabilitada) corpo.senha = senha;
+      const response = await api.post("/colaboradores", corpo);
       setSucesso(`${response.data.nome} cadastrado como ${response.data.role}.`);
       limparCampos();
       if (onSucesso) onSucesso();
@@ -68,6 +77,12 @@ export default function CadastrarColaboradorForm({ onSucesso }) {
   return (
     <div className="card">
       <h3>Cadastrar colaborador ou coordenador</h3>
+      {!senhaHabilitada && (
+        <p style={{ fontSize: "0.85rem", marginTop: "-0.5rem" }}>
+          A pessoa entra com a conta DB1 usando esse email. Use isso para já deixar a equipe e o papel definidos
+          (por exemplo, cadastrar um novo coordenador).
+        </p>
+      )}
       <form onSubmit={handleSubmit}>
         <div className="field-row" style={{ marginBottom: "1rem" }}>
           <div className="field">
@@ -86,17 +101,19 @@ export default function CadastrarColaboradorForm({ onSucesso }) {
             />
           </div>
 
-          <div className="field">
-            <label htmlFor="senhaNova">Senha</label>
-            <input
-              id="senhaNova"
-              type="password"
-              value={senha}
-              onChange={(e) => setSenha(e.target.value)}
-              minLength={6}
-              required
-            />
-          </div>
+          {senhaHabilitada && (
+            <div className="field">
+              <label htmlFor="senhaNova">Senha</label>
+              <input
+                id="senhaNova"
+                type="password"
+                value={senha}
+                onChange={(e) => setSenha(e.target.value)}
+                minLength={6}
+                required
+              />
+            </div>
+          )}
         </div>
 
         <div className="field-row" style={{ marginBottom: "1rem" }}>
