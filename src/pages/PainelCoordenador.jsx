@@ -7,6 +7,15 @@ import Topbar from "../components/Topbar";
 import StatusBadge from "../components/StatusBadge";
 import AvisoConflito from "../components/AvisoConflito";
 import CadastrarColaboradorForm from "../components/CadastrarColaboradorForm";
+import CalendarioAnual from "../components/CalendarioAnual";
+
+// valor do dropdown que mostra as equipes todas juntas
+const TODAS = "todas";
+
+// o backend manda o momento em UTC; o navegador converte para o horario local
+function dataBr(instante) {
+  return new Date(instante).toLocaleDateString("pt-BR");
+}
 
 export default function PainelCoordenador() {
   const [equipes, setEquipes] = useState([]);
@@ -33,8 +42,10 @@ export default function PainelCoordenador() {
   const carregarPeriodos = useCallback(() => {
     if (!equipeSelecionada) return;
     setCarregando(true);
+    setErro("");
+    const url = equipeSelecionada === TODAS ? "/ferias/todos" : `/ferias/equipe/${equipeSelecionada}`;
     api
-      .get(`/ferias/equipe/${equipeSelecionada}`)
+      .get(url)
       .then((response) => setPeriodos(response.data))
       .catch(() => setErro("Nao foi possivel carregar os periodos dessa equipe."))
       .finally(() => setCarregando(false));
@@ -64,6 +75,8 @@ export default function PainelCoordenador() {
     }
   }
 
+  const mostrarEquipe = equipeSelecionada === TODAS;
+
   return (
     <div className="page">
       <Topbar title="Painel do coordenador">
@@ -88,9 +101,12 @@ export default function PainelCoordenador() {
                 {eq.nome}
               </option>
             ))}
+            {equipes.length > 1 && <option value={TODAS}>Todas as equipes</option>}
           </select>
         </div>
       </div>
+
+      {!carregando && !erro && <CalendarioAnual periodos={periodos} />}
 
       {erroAcao && <div className="alert alert-error">{erroAcao}</div>}
       {erro && <div className="alert alert-error">{erro}</div>}
@@ -105,9 +121,11 @@ export default function PainelCoordenador() {
           <thead>
             <tr>
               <th>Solicitante</th>
+              {mostrarEquipe && <th>Equipe</th>}
               <th>Inicio</th>
               <th>Fim</th>
               <th>Status</th>
+              <th>DP</th>
               <th></th>
             </tr>
           </thead>
@@ -115,11 +133,21 @@ export default function PainelCoordenador() {
             {periodos.map((p) => (
               <tr key={p.id}>
                 <td>{p.solicitanteNome}</td>
+                {mostrarEquipe && <td>{p.equipeNome}</td>}
                 <td>{p.dataInicio}</td>
                 <td>{p.dataFim}</td>
                 <td>
                   <StatusBadge status={p.status} />
                   {p.conflitoComEquipe && <AvisoConflito colegas={p.colegasConflitantes} />}
+                </td>
+                <td>
+                  {p.status !== "APROVADO" && "-"}
+                  {p.status === "APROVADO" && p.enviadoDpEm && (
+                    <span className="dp-enviado">Enviado em {dataBr(p.enviadoDpEm)}</span>
+                  )}
+                  {p.status === "APROVADO" && !p.enviadoDpEm && (
+                    <span className="dp-aguardando">Aguardando envio</span>
+                  )}
                 </td>
                 <td>
                   {p.status === "PENDENTE" && (
